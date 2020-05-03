@@ -1,15 +1,25 @@
 import React, { useState } from "react";
-import { Container, AppBar, Toolbar, Drawer, Divider } from "@material-ui/core";
+import {
+  Container,
+  AppBar,
+  Toolbar,
+  Grid,
+  CssBaseline,
+  Drawer,
+} from "@material-ui/core";
 import SelectTenant from "./components/auth/SelectTenant";
 import { getAccount } from "./lib/auth";
 import Login from "./components/auth/Login";
-import { useHash } from "./lib/hooks";
 import SelectSubscription from "./components/menu/SelectSubscription";
+import SelectLogicApp from "./components/menu/SelectLogicApp";
+import Executions from "./components/logicapps/Executions";
+import { useStyles } from "./lib/style";
 
 function App() {
   const account = getAccount();
-  const hasTenant = useHash();
+  const classes = useStyles();
   const [subscriptionId, setSubscriptionId] = useState<string | undefined>();
+  const [logicAppName, setLogicAppName] = useState<string | undefined>();
 
   if (!account) {
     return (
@@ -20,8 +30,9 @@ function App() {
   }
 
   return (
-    <>
-      <AppBar position="static">
+    <div>
+      <CssBaseline />
+      <AppBar position="absolute" className={classes.appBar}>
         <Toolbar>
           <SelectTenant />
           <SelectSubscription
@@ -30,17 +41,21 @@ function App() {
           />
         </Toolbar>
       </AppBar>
-      <Container maxWidth="xl">
-        {hasTenant && (
-          <div>
-            <Drawer variant="temporary" anchor="left" open>
-              <Divider />
-              {subscriptionId}
-            </Drawer>
-          </div>
-        )}
-      </Container>
-    </>
+      {subscriptionId && (
+        <>
+          <Drawer open variant="permanent" className={classes.drawerPaper}>
+            <SelectLogicApp
+              subscriptionId={subscriptionId}
+              onSelect={setLogicAppName}
+            />
+          </Drawer>
+          <main className={classes.content}>
+            <div className={classes.appBarSpacer} />
+            <Executions logicAppName={logicAppName} />
+          </main>
+        </>
+      )}
+    </div>
   );
 }
 

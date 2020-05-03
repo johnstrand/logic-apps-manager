@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Select, MenuItem } from "@material-ui/core";
+import { Select, MenuItem, LinearProgress } from "@material-ui/core";
 import { useHash } from "../../lib/hooks";
 import { listSubscriptions } from "../../lib/api";
 import useAsync, { AsyncState } from "react-hooks-useasync";
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const SelectSubscription = ({ onSelect, id }: Props) => {
-  const hash = useHash();
+  const [tenantId] = useHash();
 
   const [subscriptions, state, getSubscriptions] = useAsync(
     listSubscriptions,
@@ -18,12 +18,12 @@ const SelectSubscription = ({ onSelect, id }: Props) => {
   );
 
   useEffect(() => {
-    if (!hash) {
+    if (!tenantId) {
       return;
     }
 
     getSubscriptions();
-  }, [hash, getSubscriptions]);
+  }, [tenantId, getSubscriptions]);
 
   useEffect(() => {
     if (subscriptions.length) {
@@ -31,14 +31,18 @@ const SelectSubscription = ({ onSelect, id }: Props) => {
     }
   }, [subscriptions, onSelect]);
 
-  if (!hash || state === AsyncState.Idle || state === AsyncState.Pending) {
-    return null;
+  if (!tenantId || state === AsyncState.Idle || state === AsyncState.Pending) {
+    return <LinearProgress />;
   }
 
   return (
     <Select
       style={{ color: "white" }}
-      value={id || subscriptions[0].subscriptionId}
+      value={
+        id && subscriptions.some((s) => s.subscriptionId === id)
+          ? id
+          : subscriptions[0].subscriptionId
+      }
       onChange={(name) => onSelect(name.target.value as string)}
     >
       {subscriptions.map((subscription) => (

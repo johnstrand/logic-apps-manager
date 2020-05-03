@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-const getHash = () =>
-  window.location.hash ? window.location.hash.substr(1) : "";
+export const getHash = () =>
+  window.location.hash ? window.location.hash.substr(1).split("/") : [];
 
 export const useHash = () => {
   const [value, setValue] = useState(getHash());

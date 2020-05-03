@@ -1,5 +1,11 @@
 import { getToken } from "../auth";
-import { ODataResponse, Tenant, Subscription } from "./Types";
+import {
+  ODataResponse,
+  Tenant,
+  Subscription,
+  LogicApp,
+  LogicAppRun,
+} from "./Types";
 
 async function get<T>(url: string) {
   const endpoint = `https://management.azure.com/${url}`;
@@ -32,4 +38,19 @@ export const listSubscriptions = async () => {
     "subscriptions?api-version=2019-11-01"
   );
   return tenants.value;
+};
+
+export const listLogicApps = async (subscriptionId: string) => {
+  const logicApps = await get<ODataResponse<LogicApp>>(
+    `subscriptions/${subscriptionId}/providers/Microsoft.Logic/workflows?$top=100&api-version=2016-06-01`
+  );
+  return logicApps.value;
+};
+
+// TODO: Handle skip token
+export const listLogicAppRuns = async (logicAppId: string) => {
+  const runs = await get<ODataResponse<LogicAppRun>>(
+    `${logicAppId}/runs?api-version=2016-06-01`
+  );
+  return { runs: runs.value, next: runs.nextLink };
 };
