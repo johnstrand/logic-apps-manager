@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { listLogicAppRuns } from "../../lib/api";
-import MaterialTable from "material-table";
 import useAsync, { AsyncState } from "react-hooks-useasync";
 import { parseResourceId, groupBy } from "../../lib/utils";
 import { GetApp, Publish, MoreVert } from "@material-ui/icons";
@@ -23,10 +22,7 @@ interface Props {
 }
 
 const Executions = ({ logicAppName }: Props) => {
-  const [list, state, getRuns] = useAsync(listLogicAppRuns, {
-    runs: [],
-    next: null,
-  });
+  const [list, , getRuns] = useAsync(listLogicAppRuns, []);
 
   useEffect(() => {
     if (logicAppName) {
@@ -37,8 +33,9 @@ const Executions = ({ logicAppName }: Props) => {
   if (!logicAppName) {
     return <div>Select a Logic App from the menu to the left</div>;
   }
+
   const groupedExecutions = groupBy(
-    list.runs,
+    list,
     (run) => run.properties!.correlation.clientTrackingId
   );
 
